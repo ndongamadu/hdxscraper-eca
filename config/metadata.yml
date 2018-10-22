@@ -15,5 +15,5 @@ health:
 population_and_migration:
   data_source: United Nations Population Division
   name: UNECA population_and_migration
-  notes: tbd
+  notes: TBD
   title: Population and migration

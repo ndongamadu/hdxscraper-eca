@@ -16,7 +16,7 @@ def main():
     datasets = generateDatasets(32)
     for dataset in datasets:
     	dataset.update_from_yaml()
-    	dataset.check_required_fields(ignore_fields=['notes'])
+    	# dataset.check_required_fields(ignore_fields=['notes'])
 
     	dataset.create_in_hdx()
 

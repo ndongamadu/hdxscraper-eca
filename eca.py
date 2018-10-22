@@ -123,7 +123,6 @@ def generateDatasetBykey(key, countryName):
     resource['name'] = rName
     resource['description'] = 'UNECA %s data' % countryName
     resource['format'] = 'csv'
-
     # resource.check_required_fields(['notes'])
 
     dataset.add_update_resource(resource)
