@@ -1,14 +1,19 @@
 education:
   data_source: United Nations Educational, Scientific and Cultural Organization (UNESCO),United
     Nations Development Programme (UNDP),United Nations Statistics Division
-  name: nouveau nom
-  title: tbd
+  name: UNECA education
+  notes: This dataset contains many indicators in education such as as Net enrolment
+    rate in primary education, Ratio of girls to boys in primary education, etc. The
+    whole list and their description can be find in this link https://ecastats.uneca.org/data/Browsebysectorindicators.aspx?qrysectorid=5
+  title: Education
 health:
   data_source: United Nations Statistics Division,World Bank,United Nations Children's
     Fund (UNICEF),World Health Organization,Food and Agriculture Organization (FAO)
-  name: tbd
-  title: tbd
+  name: UNECA health
+  notes: tbd
+  title: Health
 population_and_migration:
   data_source: United Nations Population Division
-  name: tbd
-  title: tbd
+  name: UNECA population_and_migration
+  notes: tbd
+  title: Population and migration

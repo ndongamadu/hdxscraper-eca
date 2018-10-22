@@ -5,11 +5,14 @@
 United Nations Economic Commission for Africa
 HDX data scraper
 """
-
+import os
 from bs4 import BeautifulSoup
 import requests
 import csv
 import yaml
+from slugify import slugify
+from hdx.data.dataset import Dataset
+from hdx.data.resource import Resource
 
 
 def getHTML(id):
@@ -38,6 +41,7 @@ def getResources(countryName, dataResource, soup):
     """
     Generate indicators data for a country
     """
+    print("==================== Getting resources ====================")
     for dr in dataResource:
         table = soup.find('table', id=dataResource[dr]['dTableID'])
         rows = table.findAll('tr')
@@ -81,22 +85,69 @@ def getResources(countryName, dataResource, soup):
                     metadata['education']['data_source'] = ','.join(source)
         yaml.dump(metadata, open('config/metadata.yml', 'w'),
                   default_flow_style=False)
+    print("==================== Resources downloaded !!! ====================")
 
-def completMetadata():
-    """
-    Add datasets names and titles in config/metadata.yml file
-    """
 
+
+def generateDatasetBykey(key, countryName):
+    metadata = yaml.load(open('config/metadata.yml', 'r'))
+    title = '%s - ' % countryName + metadata[key]['title']
+    name = metadata[key]['name']
+    desc = metadata[key]['notes']
+    slugified_name = slugify(name).lower()
+    dataset = Dataset({
+        'name': slugified_name,
+        'title': title,
+        'description': desc})
+    dataset.set_dataset_year_range(1985, 2017)
+    dataset.set_expected_update_frequency('Every year')
+    dataset.set_subnational(1)
+    dataset.add_country_location(countryName)
+    resource = Resource()
+    rName = ''
+    upCountry = countryName.upper()
+    if key == 'education':
+        dataset.add_tag('EDUCATION')
+        rName = 'UNECA %s - Education' % countryName
+        resource.set_file_to_upload('data/%s-education.csv' % upCountry)
+    if key == 'health':
+        dataset.add_tag('health')
+        rName = 'UNECA %s - Health' % countryName
+        resource.set_file_to_upload('data/%s-health.csv' % upCountry)
+    if key == 'population_and_migration':
+        dataset.add_tags(['population', 'migration'])
+        rName = 'UNECA %s - Population and Migration' % countryName
+        resource.set_file_to_upload(
+            'data/%s-population_and_migration.csv' % upCountry)
+
+    resource['name'] = rName
+    resource['description'] = 'UNECA %s data' % countryName
+    resource['format'] = 'csv'
+
+    # resource.check_required_fields(['notes'])
+
+    dataset.add_update_resource(resource)
+    print("==================== %s dataset generated ====================" % key)
+
+    return dataset
 
 
 def generateDatasets(pageID):
     # get the html content once in a global variable
     soup = getHTML(pageID)
     countryName = getCountryName(soup)
-
-    dataResource = {'population_and_migration': {'dTableID': 'StatBasebody_tblPopulation', 'sTableID': 'StatBasebody_tblPopulationDS'},
+    datasets = []
+    dataResource = {'population_and_migration':{'dTableID': 'StatBasebody_tblPopulation', 'sTableID': 'StatBasebody_tblPopulationDS'},
                     'health': {'dTableID': 'StatBasebody_tblHealth', 'sTableID': 'StatBasebody_tblHealthDS'},
                     'education': {'dTableID': 'StatBasebody_tblEducation', 'sTableID': 'StatBasebody_tblEducationDS'}
                     }
     getResources(countryName, dataResource, soup)
+    educationDataset = generateDatasetBykey('education', countryName)
+    healthDataset = generateDatasetBykey('health', countryName)
+    popDataset = generateDatasetBykey('population_and_migration', countryName)
+    datasets.append(educationDataset)
+    datasets.append(healthDataset)
+    datasets.append(popDataset)
+    print("============================== Done creating datasets ====================")
+    return datasets
 
